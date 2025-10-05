@@ -5,7 +5,7 @@ import bg.tuvarna.devicebackend.controllers.execptions.ErrorCode;
 import bg.tuvarna.devicebackend.controllers.execptions.ErrorResponse;
 import bg.tuvarna.devicebackend.models.dtos.AuthResponseDTO;
 import bg.tuvarna.devicebackend.models.dtos.UserLoginDTO;
-import bg.tuvarna.devicebackend.models.dtos.UserDTO;
+import bg.tuvarna.devicebackend.models.dtos.UserVO;
 import bg.tuvarna.devicebackend.models.entities.User;
 import bg.tuvarna.devicebackend.services.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -52,8 +52,8 @@ public class AuthFilter {
         if (authentication.isAuthenticated()) {
             User principal = (User) authentication.getPrincipal();
             String token = jwtService.generateToken(userService.getUserById(principal.getId()));
-            UserDTO userDTO = new UserDTO(principal);
-            AuthResponseDTO responseDTO = new AuthResponseDTO(token, userDTO);
+            UserVO userVO = new UserVO(principal);
+            AuthResponseDTO responseDTO = new AuthResponseDTO(token, userVO);
             httpServletResponse.setStatus(HttpServletResponse.SC_OK);
             httpServletResponse.setContentType("application/json");
             try {
