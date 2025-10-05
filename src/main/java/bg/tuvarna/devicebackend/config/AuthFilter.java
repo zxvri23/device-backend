@@ -3,7 +3,9 @@ package bg.tuvarna.devicebackend.config;
 import bg.tuvarna.devicebackend.controllers.execptions.CustomException;
 import bg.tuvarna.devicebackend.controllers.execptions.ErrorCode;
 import bg.tuvarna.devicebackend.controllers.execptions.ErrorResponse;
+import bg.tuvarna.devicebackend.models.dtos.AuthResponseDTO;
 import bg.tuvarna.devicebackend.models.dtos.UserLoginDTO;
+import bg.tuvarna.devicebackend.models.dtos.UserVO;
 import bg.tuvarna.devicebackend.models.entities.User;
 import bg.tuvarna.devicebackend.services.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
@@ -50,8 +51,16 @@ public class AuthFilter {
     private void successHandler(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Authentication authentication) {
         if (authentication.isAuthenticated()) {
             User principal = (User) authentication.getPrincipal();
-            httpServletResponse.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.generateToken(userService.getUserById(principal.getId())));
+            String token = jwtService.generateToken(userService.getUserById(principal.getId()));
+            UserVO userVO = new UserVO(principal);
+            AuthResponseDTO responseDTO = new AuthResponseDTO(token, userVO);
             httpServletResponse.setStatus(HttpServletResponse.SC_OK);
+            httpServletResponse.setContentType("application/json");
+            try {
+                objectMapper.writeValue(httpServletResponse.getWriter(), responseDTO);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to write auth response", e);
+            }
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
     }
