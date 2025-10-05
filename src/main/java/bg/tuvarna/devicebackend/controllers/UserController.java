@@ -46,7 +46,7 @@ public class UserController {
                             schema = @Schema(implementation = AuthResponseDTO.class)))
     })
     @PostMapping("/login")
-    public ResponseEntity<Void> userLogin(@RequestBody(required = false) UserLoginDTO dto, @AuthenticationPrincipal User user) {
+    public ResponseEntity<AuthResponseDTO> userLogin(@RequestBody(required = false) UserLoginDTO dto, @AuthenticationPrincipal User user) {
         return ResponseEntity.ok().build();
     }
 
