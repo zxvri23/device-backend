@@ -31,31 +31,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String jwt;
         final String id;
 
-        if (authHeader == null || !authHeader.startsWith("Bearer "))
-        {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
         jwt = authHeader.substring(7);
         try {
-            if(!jwtService.isTokenExpired(jwt))
-            {
+            if (!jwtService.isTokenExpired(jwt)) {
                 id = jwtService.extractId(jwt);
 
-                if(id != null && SecurityContextHolder.getContext().getAuthentication() == null)
-                {
+                if (id != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     User user = userDetailsService.loadUserByUsername(id);
-                    if(jwtService.isTokenValid(jwt,user))
-                    {
-                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(user,null,user.getAuthorities());
+                    if (jwtService.isTokenValid(jwt, user)) {
+                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
                         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                         SecurityContextHolder.getContext().setAuthentication(authToken);
                     }
                 }
             }
             filterChain.doFilter(request, response);
-        }catch (Exception e) {
+        } catch (Exception e) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token");
         }
     }

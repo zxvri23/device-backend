@@ -83,11 +83,11 @@ public class UserController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully logged in.",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = UserDTO.class)))
+                            schema = @Schema(implementation = UserVO.class)))
     })
     @GetMapping("/getUser")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<UserDTO> getUser(@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(new UserDTO(user));
+    public ResponseEntity<UserVO> getUser(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(new UserVO(user));
     }
 }

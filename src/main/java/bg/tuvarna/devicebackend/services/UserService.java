@@ -7,6 +7,7 @@ import bg.tuvarna.devicebackend.models.dtos.UserCreateVO;
 import bg.tuvarna.devicebackend.models.dtos.UserListing;
 import bg.tuvarna.devicebackend.models.dtos.UserUpdateVO;
 import bg.tuvarna.devicebackend.models.entities.User;
+import bg.tuvarna.devicebackend.models.enums.UserRole;
 import bg.tuvarna.devicebackend.repositories.UserRepository;
 import bg.tuvarna.devicebackend.utils.CustomPage;
 import lombok.AllArgsConstructor;
@@ -97,6 +98,9 @@ public class UserService {
 
     public void updateUser(UserUpdateVO userUpdateVO) {
         User user = getUserById(userUpdateVO.id());
+        if (user.getRole() == UserRole.ADMIN) {
+            throw new CustomException("Admin password can't be changed", ErrorCode.Validation);
+        }
         if (isEmailTaken(userUpdateVO.email()) && !user.getEmail().equals(userUpdateVO.email())) {
             throw new CustomException("Email already taken", ErrorCode.AlreadyExists);
         }
@@ -114,6 +118,9 @@ public class UserService {
 
     public void updatePassword(Long id, ChangePasswordVO passwordVO) {
         User user = getUserById(id);
+        if (user.getRole() == UserRole.ADMIN) {
+            throw new CustomException("Admin password can't be changed", ErrorCode.Validation);
+        }
         if (passwordEncoder.matches(passwordVO.oldPassword(), user.getPassword())) {
             user.setPassword(passwordEncoder.encode(passwordVO.newPassword()));
             userRepository.save(user);
