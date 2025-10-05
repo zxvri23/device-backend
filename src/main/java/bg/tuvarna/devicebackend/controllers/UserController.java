@@ -6,7 +6,6 @@ import bg.tuvarna.devicebackend.models.entities.User;
 import bg.tuvarna.devicebackend.services.UserService;
 import bg.tuvarna.devicebackend.utils.CustomPage;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -40,17 +39,15 @@ public class UserController {
 
     @Operation(summary = "Login user.",
             description = "User can log in with email/phone and password. " +
-                    "If user is already logged in, it will return the user details.")
+                    "If user is already logged in, it will return the token and user details.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully logged in.",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = UserDTO.class)),
-                    headers = {
-                            @Header(name = "Authorization", description = "Bearer \"token\"")})
+                            schema = @Schema(implementation = AuthResponseDTO.class)))
     })
     @PostMapping("/login")
-    public ResponseEntity<UserDTO> userLogin(@RequestBody(required = false) UserLoginDTO dto, @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(new UserDTO(user));
+    public ResponseEntity<Void> userLogin(@RequestBody(required = false) UserLoginDTO dto, @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "Returns users.",
