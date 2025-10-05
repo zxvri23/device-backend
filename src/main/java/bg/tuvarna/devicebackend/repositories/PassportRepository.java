@@ -11,7 +11,7 @@ import java.util.List;
 public interface PassportRepository extends JpaRepository<Passport, Long> {
     @Query("select p from Passport p where p.serialPrefix like :serialPrefix and p.fromSerialNumber between :fromSerialNumberStart and :toSerialNumber" +
             " or p.serialPrefix like :serialPrefix and p.toSerialNumber between :fromSerialNumberStart and :toSerialNumber")
-    List<Passport> findByFromSerialNumberBetween(String serialPrefix,int fromSerialNumberStart, int toSerialNumber);
+    List<Passport> findByFromSerialNumberBetween(String serialPrefix, int fromSerialNumberStart, int toSerialNumber);
 
     @Query("select p from Passport p where :serialId LIKE CONCAT(p.serialPrefix, '%')")
     List<Passport> findByFromSerial(String serialId);

@@ -6,7 +6,7 @@ import bg.tuvarna.devicebackend.models.enums.UserRole;
 
 import java.util.List;
 
-public record UserDTO(
+public record UserVO(
         Long id,
         String fullName,
         String address,
@@ -15,7 +15,7 @@ public record UserDTO(
         UserRole role,
         List<Device> devices
 ) {
-    public UserDTO (User user){
+    public UserVO(User user){
         this(user.getId(), user.getFullName(), user.getAddress(), user.getPhone(), user.getEmail(), user.getRole(), user.getDevices());
     }
 }

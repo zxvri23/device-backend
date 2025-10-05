@@ -24,7 +24,7 @@ public class PassportController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful saved passport")
     })
-    @PostMapping(value="/save")
+    @PostMapping(value = "/save")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Void> save(@RequestBody PassportVO passportVO) {
         passportService.save(passportVO);

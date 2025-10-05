@@ -23,14 +23,13 @@ public class PassportService {
     public void save(PassportVO passportVO) {
         Passport passport;
         List<Passport> passports = passportRepository.findByFromSerialNumberBetween(passportVO.serialPrefix(), passportVO.fromSerialNumber(), passportVO.toSerialNumber());
-        if(passportVO.id()==null) {
-            if(!passports.isEmpty())
+        if (passportVO.id() == null) {
+            if (!passports.isEmpty())
                 throw new CustomException("Serial number already exists", ErrorCode.AlreadyExists);
             passport = PassportMapper.toEntity(passportVO);
-        }
-        else {
+        } else {
             passport = findPassportById(passportVO.id());
-            if(!passports.isEmpty() && passports.stream().anyMatch(p -> !Objects.equals(p.getId(), passport.getId())))
+            if (!passports.isEmpty() && passports.stream().anyMatch(p -> !Objects.equals(p.getId(), passport.getId())))
                 throw new CustomException("Serial number already exists", ErrorCode.AlreadyExists);
             PassportMapper.updateEntity(passport, passportVO);
         }
@@ -43,27 +42,23 @@ public class PassportService {
     }
 
     public Passport findPassportBySerialId(String serialId) {
-        try {
-            List<Passport> passports = getPassportsBySerialPrefix(serialId);
-            for(Passport passport : passports) {
-                int serialNumber;
-                try {
-                    serialNumber = Integer.parseInt(serialId.split(passport.getSerialPrefix())[1]);
-                } catch (NumberFormatException e) {
-                    continue;
-                }
-                if (serialNumber >= passport.getFromSerialNumber() && serialNumber <= passport.getToSerialNumber()) {
-                    return passport;
-                }
+        List<Passport> passports = getPassportsBySerialPrefix(serialId);
+        for (Passport passport : passports) {
+            int serialNumber;
+            try {
+                serialNumber = Integer.parseInt(serialId.split(passport.getSerialPrefix())[1]);
+            } catch (NumberFormatException e) {
+                continue;
             }
-            throw new CustomException("Passport not found for serial number: "+serialId, ErrorCode.Failed);
-        } catch (RuntimeException e) {
-            throw new CustomException("Passport not found for serial number: "+serialId, ErrorCode.Failed);
+            if (serialNumber >= passport.getFromSerialNumber() && serialNumber <= passport.getToSerialNumber()) {
+                return passport;
+            }
         }
+        throw new CustomException("Passport not found for serial number: " + serialId, ErrorCode.Failed);
     }
 
     public CustomPage<Passport> getPassports(int page, int size) {
-        Page<Passport> passports = passportRepository.findAll(PageRequest.of(page-1, size));
+        Page<Passport> passports = passportRepository.findAll(PageRequest.of(page - 1, size));
 
         CustomPage<Passport> customPage = new CustomPage<>();
         customPage.setTotalPages(passports.getTotalPages());

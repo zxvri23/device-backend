@@ -98,7 +98,7 @@ public class UserService {
 
     public void updateUser(UserUpdateVO userUpdateVO) {
         User user = getUserById(userUpdateVO.id());
-        if(user.getRole() == UserRole.ADMIN){
+        if (user.getRole() == UserRole.ADMIN) {
             throw new CustomException("Admin password can't be changed", ErrorCode.Validation);
         }
         if (isEmailTaken(userUpdateVO.email()) && !user.getEmail().equals(userUpdateVO.email())) {
@@ -118,7 +118,7 @@ public class UserService {
 
     public void updatePassword(Long id, ChangePasswordVO passwordVO) {
         User user = getUserById(id);
-        if(user.getRole() == UserRole.ADMIN){
+        if (user.getRole() == UserRole.ADMIN) {
             throw new CustomException("Admin password can't be changed", ErrorCode.Validation);
         }
         if (passwordEncoder.matches(passwordVO.oldPassword(), user.getPassword())) {
