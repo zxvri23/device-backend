@@ -46,7 +46,7 @@ public class UserController {
                             schema = @Schema(implementation = AuthResponseDTO.class)))
     })
     @PostMapping("/login")
-    public ResponseEntity<AuthResponseDTO> userLogin(@RequestBody(required = false) UserLoginDTO dto, @AuthenticationPrincipal User user) {
+    public ResponseEntity<AuthResponseDTO> userLogin(@RequestBody @Valid UserLoginDTO dto, @AuthenticationPrincipal User user) {
         return ResponseEntity.ok().build();
     }
 
@@ -62,19 +62,18 @@ public class UserController {
 
     @Operation(summary = "Update user.",
             description = "Update user.")
-    @PutMapping("/update")
+    @PutMapping("/{id}")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<Void> updateUser(@RequestBody @Valid UserUpdateVO userUpdateVO) {
-        userService.updateUser(userUpdateVO);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody @Valid UserUpdateVO userUpdateVO) {
+        return ResponseEntity.ok(userService.updateUser(id, userUpdateVO));
     }
 
     @Operation(summary = "Update password.",
             description = "Update password.")
-    @PutMapping("/changePassword")
+    @PutMapping("/{id}/changePassword")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<Void> changePassword(@RequestHeader("userId") Long userId, @RequestBody @Valid ChangePasswordVO changePasswordVO) {
-        userService.updatePassword(userId, changePasswordVO);
+    public ResponseEntity<Void> changePassword(@PathVariable Long id, @RequestBody @Valid ChangePasswordVO changePasswordVO) {
+        userService.updatePassword(id, changePasswordVO);
         return ResponseEntity.ok().build();
     }
 

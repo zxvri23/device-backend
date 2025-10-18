@@ -4,6 +4,7 @@ import bg.tuvarna.devicebackend.controllers.execptions.ErrorResponse;
 import bg.tuvarna.devicebackend.models.dtos.DeviceCreateVO;
 import bg.tuvarna.devicebackend.models.dtos.DeviceUpdateVO;
 import bg.tuvarna.devicebackend.models.entities.Device;
+import bg.tuvarna.devicebackend.models.entities.User;
 import bg.tuvarna.devicebackend.services.DeviceService;
 import bg.tuvarna.devicebackend.utils.CustomPage;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,8 +13,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -44,20 +47,19 @@ public class DeviceController {
 
     @Operation(description = "Register device for logged in user.",
             summary = "Register device for logged in user")
-    @PostMapping("/addDevice")
+    @PostMapping("/")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<Void> addDevice(@RequestBody DeviceCreateVO device) {
-        deviceService.registerNewDevice(device);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Device> addDevice(@RequestBody @Valid DeviceCreateVO device, @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(deviceService.registerNewDevice(device, user));
     }
 
     @Operation(summary = "Returns devices.",
             description = "Returns devices based on search.")
     @GetMapping
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<CustomPage<Device>> getUsers(@RequestParam(required = false) String searchBy,
-                                                       @RequestParam(defaultValue = "1") int page,
-                                                       @RequestParam(defaultValue = "10") int size) {
+    public ResponseEntity<CustomPage<Device>> getDevices(@RequestParam(required = false) String searchBy,
+                                                         @RequestParam(defaultValue = "1") int page,
+                                                         @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok(deviceService.getDevices(searchBy, page, size));
     }
 
@@ -68,10 +70,9 @@ public class DeviceController {
             @ApiResponse(responseCode = "400", description = "Device already registered.",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponse.class)))})
-    @PostMapping("/addAnonymousDevice")
-    public ResponseEntity<Void> addAnonymousDevice(@RequestBody DeviceCreateVO device) {
-        deviceService.addAnonymousDevice(device);
-        return ResponseEntity.ok().build();
+    @PostMapping("/anonymousDevice")
+    public ResponseEntity<Device> addAnonymousDevice(@RequestBody @Valid DeviceCreateVO device) {
+        return ResponseEntity.ok(deviceService.addAnonymousDevice(device));
     }
 
     @Operation(description = "Update device date by admin.",
@@ -81,11 +82,10 @@ public class DeviceController {
             @ApiResponse(responseCode = "400", description = "Device not exist.",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponse.class)))})
-    @PutMapping()
+    @PutMapping("/{serialNumber}")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<Void> updateDevice(@RequestBody DeviceUpdateVO device) {
-        deviceService.updateDevice(device);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Device> updateDevice(@PathVariable String serialNumber, @RequestBody @Valid DeviceUpdateVO device) {
+        return ResponseEntity.ok(deviceService.updateDevice(serialNumber, device));
     }
 
     @Operation(description = "Delete device date by admin.",
