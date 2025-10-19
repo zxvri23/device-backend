@@ -1,6 +1,5 @@
 package bg.tuvarna.devicebackend.models.dtos;
 
-import bg.tuvarna.devicebackend.models.entities.Device;
 import bg.tuvarna.devicebackend.models.entities.User;
 import bg.tuvarna.devicebackend.models.enums.UserRole;
 
@@ -13,9 +12,17 @@ public record UserVO(
         String phone,
         String email,
         UserRole role,
-        List<Device> devices
+        List<DeviceVO> devices
 ) {
-    public UserVO(User user){
-        this(user.getId(), user.getFullName(), user.getAddress(), user.getPhone(), user.getEmail(), user.getRole(), user.getDevices());
+    public UserVO(User user) {
+        this(
+                user.getId(),
+                user.getFullName(),
+                user.getAddress(),
+                user.getPhone(),
+                user.getEmail(),
+                user.getRole(),
+                user.getDevices().stream().map((DeviceVO::new)).toList()
+        );
     }
 }

@@ -64,8 +64,10 @@ public class UserController {
             description = "Update user.")
     @PutMapping("/{id}")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody @Valid UserUpdateVO userUpdateVO) {
-        return ResponseEntity.ok(userService.updateUser(id, userUpdateVO));
+    public ResponseEntity<UserVO> updateUser(@PathVariable Long id, @RequestBody @Valid UserUpdateVO userUpdateVO) {
+        User updatedUser = userService.updateUser(id, userUpdateVO);
+
+        return ResponseEntity.ok(new UserVO(updatedUser));
     }
 
     @Operation(summary = "Update password.",

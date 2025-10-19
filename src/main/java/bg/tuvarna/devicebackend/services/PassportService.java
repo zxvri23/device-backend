@@ -39,8 +39,11 @@ public class PassportService {
             throw new CustomException("Passport not found", ErrorCode.EntityNotFound);
         }
 
-        List<Passport> passports = passportRepository.findByFromSerialNumberBetween(passportUpdateVO.serialPrefix(), passportUpdateVO.fromSerialNumber(), passportUpdateVO.toSerialNumber());
+        String serialPrefix = passportUpdateVO.serialPrefix() != null ? passportUpdateVO.serialPrefix() : passport.getSerialPrefix();
+        int fromSerialNumber = passportUpdateVO.fromSerialNumber() != null ? passportUpdateVO.fromSerialNumber() : passport.getFromSerialNumber();
+        int toSerialNumber = passportUpdateVO.toSerialNumber() != null ? passportUpdateVO.toSerialNumber() : passport.getToSerialNumber();
 
+        List<Passport> passports = passportRepository.findByFromSerialNumberBetween(serialPrefix, fromSerialNumber, toSerialNumber);
         if (!passports.isEmpty() && passports.stream().anyMatch(p -> !Objects.equals(p.getId(), passport.getId()))) {
             throw new CustomException("Serial number already exists", ErrorCode.AlreadyExists);
         }

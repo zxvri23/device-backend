@@ -39,8 +39,8 @@ public class UserService {
         user = userRepository.saveAndFlush(user);
 
         if (
-                (userCreateVO.deviceSerialNumber() == null || userCreateVO.deviceSerialNumber().isBlank())
-                        && userCreateVO.purchaseDate() == null
+                userCreateVO.deviceSerialNumber() == null || userCreateVO.deviceSerialNumber().isBlank()
+                || userCreateVO.purchaseDate() == null
         ) {
             return;
         }

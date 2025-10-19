@@ -1,6 +1,7 @@
 package bg.tuvarna.devicebackend.controllers;
 
 import bg.tuvarna.devicebackend.models.dtos.RenovationCreateVO;
+import bg.tuvarna.devicebackend.models.dtos.RenovationVO;
 import bg.tuvarna.devicebackend.models.entities.Renovation;
 import bg.tuvarna.devicebackend.services.RenovationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.net.URI;
+
 @RestController
 @RequestMapping("/api/v1/renovations")
 @AllArgsConstructor
@@ -23,7 +26,9 @@ public class RenovationController {
             summary = "Add renovation for device")
     @PostMapping()
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<Renovation> saveRenovation(@RequestBody @Valid RenovationCreateVO vo) {
-        return ResponseEntity.ok(renovationService.save(vo));
+    public ResponseEntity<RenovationVO> saveRenovation(@RequestBody @Valid RenovationCreateVO vo) {
+        Renovation saved = renovationService.save(vo);
+
+        return ResponseEntity.created(URI.create("/devices/" + saved.getId())).body(new RenovationVO(saved));
     }
 }

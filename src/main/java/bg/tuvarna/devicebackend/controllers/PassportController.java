@@ -3,6 +3,7 @@ package bg.tuvarna.devicebackend.controllers;
 import bg.tuvarna.devicebackend.models.dtos.PassportCreateVO;
 import bg.tuvarna.devicebackend.models.dtos.PassportForSerialNumberVO;
 import bg.tuvarna.devicebackend.models.dtos.PassportUpdateVO;
+import bg.tuvarna.devicebackend.models.dtos.PassportVO;
 import bg.tuvarna.devicebackend.models.entities.Passport;
 import bg.tuvarna.devicebackend.services.PassportService;
 import bg.tuvarna.devicebackend.utils.CustomPage;
@@ -14,6 +15,8 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
 
 @RestController
 @RequestMapping("api/v1/passports")
@@ -29,8 +32,10 @@ public class PassportController {
     })
     @PostMapping()
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<Passport> create(@RequestBody @Valid PassportCreateVO passportCreateVO) {
-        return ResponseEntity.ok(passportService.create(passportCreateVO));
+    public ResponseEntity<PassportVO> create(@RequestBody @Valid PassportCreateVO passportCreateVO) {
+        Passport saved = passportService.create(passportCreateVO);
+
+        return ResponseEntity.created(URI.create("/passports/" + saved.getId())).body(new PassportVO(saved));
     }
 
     @Operation(description = "Update passport",
@@ -41,8 +46,8 @@ public class PassportController {
     })
     @PutMapping(value = "/{id}")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<Passport> update(@PathVariable Long id, @RequestBody @Valid PassportUpdateVO passportUpdateVO) {
-        return ResponseEntity.ok(passportService.update(id, passportUpdateVO));
+    public ResponseEntity<PassportVO> update(@PathVariable Long id, @RequestBody @Valid PassportUpdateVO passportUpdateVO) {
+        return ResponseEntity.ok(new PassportVO(passportService.update(id, passportUpdateVO)));
     }
 
     @Operation(description = "Get passports",

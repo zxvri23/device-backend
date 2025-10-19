@@ -3,6 +3,7 @@ package bg.tuvarna.devicebackend.controllers;
 import bg.tuvarna.devicebackend.controllers.execptions.ErrorResponse;
 import bg.tuvarna.devicebackend.models.dtos.DeviceCreateVO;
 import bg.tuvarna.devicebackend.models.dtos.DeviceUpdateVO;
+import bg.tuvarna.devicebackend.models.dtos.DeviceVO;
 import bg.tuvarna.devicebackend.models.entities.Device;
 import bg.tuvarna.devicebackend.models.entities.User;
 import bg.tuvarna.devicebackend.services.DeviceService;
@@ -19,6 +20,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
+
 @RestController
 @RequestMapping("/api/v1/devices")
 @AllArgsConstructor
@@ -29,8 +32,8 @@ public class DeviceController {
             summary = "Return device by id")
     @GetMapping("/{id}")
     @SecurityRequirement(name = "bearerAuth")
-    public Device findDevice(@PathVariable String id) {
-        return deviceService.findDevice(id);
+    public DeviceVO findDevice(@PathVariable String id) {
+        return new DeviceVO(deviceService.findDevice(id));
     }
 
     @Operation(description = "Checks if device exists, which means the user is registered.",
@@ -41,16 +44,18 @@ public class DeviceController {
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponse.class)))})
     @GetMapping("/exists/{id}")
-    public ResponseEntity<Device> isDeviceExists(@PathVariable String id) {
-        return ResponseEntity.ok(deviceService.isDeviceExists(id));
+    public ResponseEntity<DeviceVO> isDeviceExists(@PathVariable String id) {
+        return ResponseEntity.ok(new DeviceVO(deviceService.isDeviceExists(id)));
     }
 
     @Operation(description = "Register device for logged in user.",
             summary = "Register device for logged in user")
     @PostMapping("/")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<Device> addDevice(@RequestBody @Valid DeviceCreateVO device, @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(deviceService.registerNewDevice(device, user));
+    public ResponseEntity<DeviceVO> addDevice(@RequestBody @Valid DeviceCreateVO device, @AuthenticationPrincipal User user) {
+        Device saved = deviceService.registerNewDevice(device, user);
+
+        return ResponseEntity.created(URI.create("/devices/" + saved.getSerialNumber())).body(new DeviceVO(saved));
     }
 
     @Operation(summary = "Returns devices.",
@@ -71,8 +76,10 @@ public class DeviceController {
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponse.class)))})
     @PostMapping("/anonymousDevice")
-    public ResponseEntity<Device> addAnonymousDevice(@RequestBody @Valid DeviceCreateVO device) {
-        return ResponseEntity.ok(deviceService.addAnonymousDevice(device));
+    public ResponseEntity<DeviceVO> addAnonymousDevice(@RequestBody @Valid DeviceCreateVO device) {
+        Device saved = deviceService.addAnonymousDevice(device);
+
+        return ResponseEntity.created(URI.create("/devices/" + saved.getSerialNumber())).body(new DeviceVO(saved));
     }
 
     @Operation(description = "Update device date by admin.",
@@ -84,8 +91,8 @@ public class DeviceController {
                             schema = @Schema(implementation = ErrorResponse.class)))})
     @PutMapping("/{serialNumber}")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<Device> updateDevice(@PathVariable String serialNumber, @RequestBody @Valid DeviceUpdateVO device) {
-        return ResponseEntity.ok(deviceService.updateDevice(serialNumber, device));
+    public ResponseEntity<DeviceVO> updateDevice(@PathVariable String serialNumber, @RequestBody @Valid DeviceUpdateVO device) {
+        return ResponseEntity.ok(new DeviceVO(deviceService.updateDevice(serialNumber, device)));
     }
 
     @Operation(description = "Delete device date by admin.",

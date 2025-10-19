@@ -17,15 +17,15 @@ public class PassportMapper {
     }
 
     public static void updateEntity(Passport passport, PassportUpdateVO passportUpdateVO) {
-        if (passportUpdateVO.name() != null && !passportUpdateVO.name().isEmpty()) {
+        if (passportUpdateVO.name() != null && !passportUpdateVO.name().isBlank()) {
             passport.setName(passportUpdateVO.name());
         }
 
-        if (passportUpdateVO.model() != null && !passportUpdateVO.model().isEmpty()) {
+        if (passportUpdateVO.model() != null && !passportUpdateVO.model().isBlank()) {
             passport.setModel(passportUpdateVO.model());
         }
 
-        if (passportUpdateVO.serialPrefix() != null && !passportUpdateVO.serialPrefix().isEmpty()) {
+        if (passportUpdateVO.serialPrefix() != null && !passportUpdateVO.serialPrefix().isBlank()) {
             passport.setSerialPrefix(passportUpdateVO.serialPrefix());
         }
 
