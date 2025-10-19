@@ -20,7 +20,19 @@ public record DeviceVO(
                 device.getPurchaseDate(),
                 device.getWarrantyExpirationDate(),
                 device.getComment(),
-                device.getUser() != null ? new UserVO(device.getUser()) : null,
+                device.getUser() != null ? new UserVO(device.getUser(), false) : null,
+                new PassportVO(device.getPassport()),
+                device.getRenovations().stream().map(RenovationVO::new).toList()
+        );
+    }
+
+    public DeviceVO(Device device, boolean loadUser) {
+        this(
+                device.getSerialNumber(),
+                device.getPurchaseDate(),
+                device.getWarrantyExpirationDate(),
+                device.getComment(),
+                loadUser && device.getUser() != null ? new UserVO(device.getUser(), false) : null,
                 new PassportVO(device.getPassport()),
                 device.getRenovations().stream().map(RenovationVO::new).toList()
         );
