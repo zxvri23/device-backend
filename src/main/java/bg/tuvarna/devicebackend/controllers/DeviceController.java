@@ -3,7 +3,9 @@ package bg.tuvarna.devicebackend.controllers;
 import bg.tuvarna.devicebackend.controllers.execptions.ErrorResponse;
 import bg.tuvarna.devicebackend.models.dtos.DeviceCreateVO;
 import bg.tuvarna.devicebackend.models.dtos.DeviceUpdateVO;
+import bg.tuvarna.devicebackend.models.dtos.DeviceVO;
 import bg.tuvarna.devicebackend.models.entities.Device;
+import bg.tuvarna.devicebackend.models.entities.User;
 import bg.tuvarna.devicebackend.services.DeviceService;
 import bg.tuvarna.devicebackend.utils.CustomPage;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,9 +14,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
 
 @RestController
 @RequestMapping("/api/v1/devices")
@@ -26,8 +32,8 @@ public class DeviceController {
             summary = "Return device by id")
     @GetMapping("/{id}")
     @SecurityRequirement(name = "bearerAuth")
-    public Device findDevice(@PathVariable String id) {
-        return deviceService.findDevice(id);
+    public DeviceVO findDevice(@PathVariable String id) {
+        return new DeviceVO(deviceService.findDevice(id));
     }
 
     @Operation(description = "Checks if device exists, which means the user is registered.",
@@ -38,26 +44,27 @@ public class DeviceController {
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponse.class)))})
     @GetMapping("/exists/{id}")
-    public ResponseEntity<Device> isDeviceExists(@PathVariable String id) {
-        return ResponseEntity.ok(deviceService.isDeviceExists(id));
+    public ResponseEntity<DeviceVO> isDeviceExists(@PathVariable String id) {
+        return ResponseEntity.ok(new DeviceVO(deviceService.isDeviceExists(id)));
     }
 
     @Operation(description = "Register device for logged in user.",
             summary = "Register device for logged in user")
-    @PostMapping("/addDevice")
+    @PostMapping("/")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<Void> addDevice(@RequestBody DeviceCreateVO device) {
-        deviceService.registerNewDevice(device);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<DeviceVO> addDevice(@RequestBody @Valid DeviceCreateVO device, @AuthenticationPrincipal User user) {
+        Device saved = deviceService.registerNewDevice(device, user);
+
+        return ResponseEntity.created(URI.create("/devices/" + saved.getSerialNumber())).body(new DeviceVO(saved));
     }
 
     @Operation(summary = "Returns devices.",
             description = "Returns devices based on search.")
     @GetMapping
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<CustomPage<Device>> getUsers(@RequestParam(required = false) String searchBy,
-                                                       @RequestParam(defaultValue = "1") int page,
-                                                       @RequestParam(defaultValue = "10") int size) {
+    public ResponseEntity<CustomPage<Device>> getDevices(@RequestParam(required = false) String searchBy,
+                                                         @RequestParam(defaultValue = "1") int page,
+                                                         @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok(deviceService.getDevices(searchBy, page, size));
     }
 
@@ -68,10 +75,11 @@ public class DeviceController {
             @ApiResponse(responseCode = "400", description = "Device already registered.",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponse.class)))})
-    @PostMapping("/addAnonymousDevice")
-    public ResponseEntity<Void> addAnonymousDevice(@RequestBody DeviceCreateVO device) {
-        deviceService.addAnonymousDevice(device);
-        return ResponseEntity.ok().build();
+    @PostMapping("/anonymousDevice")
+    public ResponseEntity<DeviceVO> addAnonymousDevice(@RequestBody @Valid DeviceCreateVO device) {
+        Device saved = deviceService.addAnonymousDevice(device);
+
+        return ResponseEntity.created(URI.create("/devices/" + saved.getSerialNumber())).body(new DeviceVO(saved));
     }
 
     @Operation(description = "Update device date by admin.",
@@ -81,11 +89,10 @@ public class DeviceController {
             @ApiResponse(responseCode = "400", description = "Device not exist.",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponse.class)))})
-    @PutMapping()
+    @PutMapping("/{serialNumber}")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<Void> updateDevice(@RequestBody DeviceUpdateVO device) {
-        deviceService.updateDevice(device);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<DeviceVO> updateDevice(@PathVariable String serialNumber, @RequestBody @Valid DeviceUpdateVO device) {
+        return ResponseEntity.ok(new DeviceVO(deviceService.updateDevice(serialNumber, device)));
     }
 
     @Operation(description = "Delete device date by admin.",

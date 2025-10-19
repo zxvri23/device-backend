@@ -36,7 +36,14 @@ public class UserService {
         User user = new User(userCreateVO);
 
         user.setPassword(passwordEncoder.encode(userCreateVO.password()));
-        user = userRepository.save(user);
+        user = userRepository.saveAndFlush(user);
+
+        if (
+                userCreateVO.deviceSerialNumber() == null || userCreateVO.deviceSerialNumber().isBlank()
+                || userCreateVO.purchaseDate() == null
+        ) {
+            return;
+        }
 
         try {
             deviceService.alreadyExist(userCreateVO.deviceSerialNumber());
@@ -96,11 +103,13 @@ public class UserService {
         return customPage;
     }
 
-    public void updateUser(UserUpdateVO userUpdateVO) {
-        User user = getUserById(userUpdateVO.id());
+    public User updateUser(Long id, UserUpdateVO userUpdateVO) {
+        User user = getUserById(id);
+
         if (user.getRole() == UserRole.ADMIN) {
             throw new CustomException("Admin password can't be changed", ErrorCode.Validation);
         }
+
         if (isEmailTaken(userUpdateVO.email()) && !user.getEmail().equals(userUpdateVO.email())) {
             throw new CustomException("Email already taken", ErrorCode.AlreadyExists);
         }
@@ -113,7 +122,8 @@ public class UserService {
         user.setAddress(userUpdateVO.address());
         user.setPhone(userUpdateVO.phone());
         user.setEmail(userUpdateVO.email());
-        userRepository.save(user);
+
+        return userRepository.save(user);
     }
 
     public void updatePassword(Long id, ChangePasswordVO passwordVO) {
