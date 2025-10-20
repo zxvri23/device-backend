@@ -1,6 +1,6 @@
 package bg.tuvarna.devicebackend.services;
 
-import bg.tuvarna.devicebackend.controllers.execptions.CustomException;
+import bg.tuvarna.devicebackend.controllers.exceptions.CustomException;
 import bg.tuvarna.devicebackend.models.dtos.UserCreateVO;
 import bg.tuvarna.devicebackend.models.entities.User;
 import bg.tuvarna.devicebackend.repositories.UserRepository;
