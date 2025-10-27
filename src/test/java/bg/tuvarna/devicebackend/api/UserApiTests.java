@@ -101,6 +101,23 @@ class UserApiTests {
                 .andExpect(jsonPath("$.token").isNotEmpty());
     }
 
+    @Test
+    void userLoginError() throws Exception{
+        mvc.perform(post("/api/v1/users/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+              {
+              "username": "gosh0@abv.bg",
+              "password": "Az$um_GOSHO123"
+              }
+"""))
+                .andExpect(status().is4xxClientError());
+    }
+
+
+
+
+
 //    @Test //Теста файлва
 //    void accessProtectedEndpointWithoutToken() throws Exception {
 //        mvc.perform(get("/api/v1/users/getUser"))

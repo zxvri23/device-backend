@@ -46,4 +46,12 @@ public class UserRepositoryTests {
         User user = userRepository.searchBy("0888123456", Pageable.ofSize(1)).getContent().getFirst();
         assertEquals("gosho", user.getFullName());
     }
+
+    @Test
+    void userFindBySearchEmail() {
+        User user = userRepository.searchBy("gosho@abv.bg", Pageable.ofSize(1)).getContent().getFirst();
+        assertEquals("gosho", user.getFullName());
+    }
+
+
 }
